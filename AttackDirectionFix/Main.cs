@@ -17,8 +17,6 @@ namespace AttackDirectionFix
         public const string PluginName = "AttackDirectionFix";
         public const string PluginVersion = "1.0.0";
 
-        Hook InputBankTest_get_aimOrigin_Hook;
-
         void Awake()
         {
             Stopwatch stopwatch = Stopwatch.StartNew();
@@ -28,12 +26,20 @@ namespace AttackDirectionFix
             MethodInfo get_aimOrigin = AccessTools.DeclaredPropertyGetter(typeof(InputBankTest), nameof(InputBankTest.aimOrigin));
             if (get_aimOrigin is not null)
             {
-                InputBankTest_get_aimOrigin_Hook = new Hook(get_aimOrigin, InputBankTest_get_aimOrigin, new HookConfig { ManualApply = true });
+                new Hook(get_aimOrigin, InputBankTest_get_aimOrigin);
             }
             else
             {
                 Log.Error_NoCallerPrefix($"Unable to find InputBankTest.aimOrigin getter");
             }
+
+            On.RoR2.InteractionDriver.FindBestInteractableObject += (orig, self) =>
+            {
+                _disablePatch = true;
+                GameObject result = orig(self);
+                _disablePatch = false;
+                return result;
+            };
 
 #if DEBUG
             GameObject aimOriginVisualizer = GameObject.CreatePrimitive(PrimitiveType.Sphere);
@@ -77,21 +83,6 @@ namespace AttackDirectionFix
             Log.Info_NoCallerPrefix($"Initialized in {stopwatch.Elapsed.TotalSeconds:F2} seconds");
         }
 
-        void OnEnable()
-        {
-            InputBankTest_get_aimOrigin_Hook?.Apply();
-        }
-
-        void OnDisable()
-        {
-            InputBankTest_get_aimOrigin_Hook?.Undo();
-        }
-
-        void OnDestroy()
-        {
-            InputBankTest_get_aimOrigin_Hook?.Dispose();
-        }
-
         static Vector3 closestPointAlongRay(Ray ray, Vector3 target)
         {
             return ray.origin + (ray.direction * Vector3.Dot(ray.direction, target - ray.origin));
@@ -102,26 +93,31 @@ namespace AttackDirectionFix
             return CameraRigController.readOnlyInstancesList.FirstOrDefault(c => c.targetBody == body);
         }
 
+        static bool _disablePatch = false;
+
         delegate Vector3 orig_get_aimOrigin(InputBankTest self);
         static Vector3 InputBankTest_get_aimOrigin(orig_get_aimOrigin orig, InputBankTest self)
         {
-#pragma warning disable Publicizer001 // Accessing a member that was not originally public
-            CharacterBody body = self.characterBody;
-#pragma warning restore Publicizer001 // Accessing a member that was not originally public
-
-            CameraRigController cameraRigController = findCameraRigControllerForBody(body);
-            if (cameraRigController)
+            if (!_disablePatch)
             {
-                Transform cameraRigTransform = cameraRigController.transform;
+#pragma warning disable Publicizer001 // Accessing a member that was not originally public
+                CharacterBody body = self.characterBody;
+#pragma warning restore Publicizer001 // Accessing a member that was not originally public
+
+                CameraRigController cameraRigController = findCameraRigControllerForBody(body);
+                if (cameraRigController)
+                {
+                    Transform cameraRigTransform = cameraRigController.transform;
 
 #pragma warning disable Publicizer001 // Accessing a member that was not originally public
-                CameraTargetParams cameraTargetParams = cameraRigController.targetParams;
+                    CameraTargetParams cameraTargetParams = cameraRigController.targetParams;
 #pragma warning restore Publicizer001 // Accessing a member that was not originally public
-                if (cameraTargetParams && cameraTargetParams.cameraPivotTransform)
-                {
-                    Vector3 cameraPivot = cameraTargetParams.cameraPivotTransform.position;
+                    if (cameraTargetParams && cameraTargetParams.cameraPivotTransform)
+                    {
+                        Vector3 cameraPivot = cameraTargetParams.cameraPivotTransform.position;
 
-                    return closestPointAlongRay(new Ray(cameraRigTransform.position, cameraRigTransform.forward), cameraPivot);
+                        return closestPointAlongRay(new Ray(cameraRigTransform.position, cameraRigTransform.forward), cameraPivot);
+                    }
                 }
             }
 
