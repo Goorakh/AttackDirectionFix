@@ -15,6 +15,8 @@ namespace AttackDirectionFix.Patches
 
             On.RoR2.Projectile.ProjectileGhostController.LerpTransform += ProjectileGhostController_LerpTransform;
             On.RoR2.Projectile.ProjectileGhostController.CopyTransform += ProjectileGhostController_CopyTransform;
+
+            On.RoR2.Projectile.ProjectileStickOnImpact.TrySticking += ProjectileStickOnImpact_TrySticking;
         }
 
         static void ProjectileController_Start(On.RoR2.Projectile.ProjectileController.orig_Start orig, ProjectileController self)
@@ -73,6 +75,22 @@ namespace AttackDirectionFix.Patches
                 transform.position += projectileInitialOffset.CurrentPositionOffset;
                 transform.rotation *= projectileInitialOffset.CurrentRotationOffset;
             }
+        }
+
+        static bool ProjectileStickOnImpact_TrySticking(On.RoR2.Projectile.ProjectileStickOnImpact.orig_TrySticking orig, ProjectileStickOnImpact self, Collider hitCollider, Vector3 impactNormal)
+        {
+            bool stickingSuccess = orig(self, hitCollider, impactNormal);
+
+            if (stickingSuccess && self.TryGetComponent(out ProjectileController projectileController))
+            {
+                ProjectileGhostController ghostController = projectileController.ghost;
+                if (ghostController && ghostController.TryGetComponent(out ProjectileInitialOffset projectileInitialOffset))
+                {
+                    GameObject.Destroy(projectileInitialOffset);
+                }
+            }
+
+            return stickingSuccess;
         }
     }
 }
