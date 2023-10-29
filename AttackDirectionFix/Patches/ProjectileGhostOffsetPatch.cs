@@ -24,32 +24,45 @@ namespace AttackDirectionFix.Patches
             orig(self);
 
             ProjectileGhostController ghostController = self.ghost;
-            if (ghostController)
-            {
-                if (self.owner && self.owner.TryGetComponent(out CharacterBody ownerBody))
-                {
-                    InputBankTest inputBank = ownerBody.inputBank;
-                    if (inputBank)
-                    {
-                        Vector3 firedFrom = inputBank.aimOrigin;
-                        Vector3 visualFiredFrom = inputBank.GetUnalteredAimOrigin();
+            if (!ghostController)
+                return;
 
-                        Vector3 visualOffset = visualFiredFrom - firedFrom;
+            if (!self.owner || !self.owner.TryGetComponent(out CharacterBody ownerBody))
+                return;
+
+            InputBankTest inputBank = ownerBody.inputBank;
+            if (!inputBank)
+                return;
+
+            Vector3 currentProjectilePos = self.transform.position;
+
+            float projectileAimOriginSqrDistance = (inputBank.aimOrigin - currentProjectilePos).sqrMagnitude;
+            float maxProjectileDistanceToApplyOffset = ownerBody.bestFitRadius * 1.75f;
 
 #if DEBUG
-                        Log.Debug($"{self.name}: visualOffset={visualOffset}, length={visualOffset.magnitude}");
+            Log.Debug($"{self.name}: projectileAimOriginDistance={Mathf.Sqrt(projectileAimOriginSqrDistance)}, maxDistance={maxProjectileDistanceToApplyOffset}");
 #endif
 
-                        const float MIN_VISUAL_OFFSET_DISTANCE = 0.25f;
-                        if (visualOffset.sqrMagnitude >= MIN_VISUAL_OFFSET_DISTANCE * MIN_VISUAL_OFFSET_DISTANCE)
-                        {
-                            ProjectileInitialOffset projectileOffset = ghostController.gameObject.AddComponent<ProjectileInitialOffset>();
-                            projectileOffset.InitialPositionOffset = visualOffset;
-                            projectileOffset.InterpolationTime = _cvProjectileInterpolationTime.value;
-                        }
-                    }
-                }
-            }
+            // If the projectile position is far away from the aim origin,
+            // it likely wasn't fired from there, so applying an offset doesn't make sense
+            if (projectileAimOriginSqrDistance > maxProjectileDistanceToApplyOffset * maxProjectileDistanceToApplyOffset)
+                return;
+
+            Vector3 visualOffset = inputBank.GetUnalteredAimOrigin() - currentProjectilePos;
+
+#if DEBUG
+            Log.Debug($"{self.name}: visualOffsetDist={visualOffset.magnitude}");
+#endif
+
+            // If the calculated visual offset is small enough,
+            // don't bother with interpolating the position since it would probably not be very noticeable anyway
+            const float MIN_VISUAL_OFFSET_DISTANCE = 0.25f;
+            if (visualOffset.sqrMagnitude < MIN_VISUAL_OFFSET_DISTANCE * MIN_VISUAL_OFFSET_DISTANCE)
+                return;
+            
+            ProjectileInitialOffset projectileOffset = ghostController.gameObject.AddComponent<ProjectileInitialOffset>();
+            projectileOffset.InitialPositionOffset = visualOffset;
+            projectileOffset.InterpolationTime = _cvProjectileInterpolationTime.value;
         }
 
         static void ProjectileGhostController_LerpTransform(On.RoR2.Projectile.ProjectileGhostController.orig_LerpTransform orig, ProjectileGhostController self, Transform a, Transform b, float t)
