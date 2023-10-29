@@ -1,13 +1,6 @@
 using AttackDirectionFix.Patches;
-using AttackDirectionFix.Utils;
 using BepInEx;
-using HarmonyLib;
-using MonoMod.RuntimeDetour;
-using RoR2;
 using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using UnityEngine;
 
 namespace AttackDirectionFix
 {
