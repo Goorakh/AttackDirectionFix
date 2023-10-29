@@ -20,6 +20,8 @@ namespace AttackDirectionFix
 
             AimOriginOverridePatch.Init();
 
+            ProjectileGhostOffsetPatch.Init();
+
             PlayerAimVisualizer.Init();
 
             stopwatch.Stop();

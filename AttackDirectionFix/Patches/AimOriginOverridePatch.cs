@@ -26,10 +26,28 @@ namespace AttackDirectionFix.Patches
             On.RoR2.InteractionDriver.FindBestInteractableObject += (orig, self) =>
             {
                 _tempDisablePatch = true;
-                GameObject result = orig(self);
-                _tempDisablePatch = false;
-                return result;
+                try
+                {
+                    return orig(self);
+                }
+                finally
+                {
+                    _tempDisablePatch = false;
+                }
             };
+        }
+
+        public static Vector3 GetUnalteredAimOrigin(this InputBankTest inputBankTest)
+        {
+            _tempDisablePatch = true;
+            try
+            {
+                return inputBankTest.aimOrigin;
+            }
+            finally
+            {
+                _tempDisablePatch = false;
+            }
         }
 
         delegate Vector3 orig_get_aimOrigin(InputBankTest self);
