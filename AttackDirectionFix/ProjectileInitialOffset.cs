@@ -1,9 +1,7 @@
-﻿using RoR2.Projectile;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace AttackDirectionFix
 {
-    [RequireComponent(typeof(ProjectileGhostController))]
     public class ProjectileInitialOffset : MonoBehaviour
     {
         public Vector3 InitialPositionOffset;
