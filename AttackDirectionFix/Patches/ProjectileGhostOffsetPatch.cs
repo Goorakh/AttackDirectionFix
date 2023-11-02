@@ -34,21 +34,24 @@ namespace AttackDirectionFix.Patches
             if (!inputBank)
                 return;
 
-            Vector3 currentProjectilePos = self.transform.position;
+            if (!self.TryGetComponent(out FireProjectileInfoTracker fireProjectileInfoTracker))
+                return;
 
-            float projectileAimOriginSqrDistance = (inputBank.aimOrigin - currentProjectilePos).sqrMagnitude;
-            float maxProjectileDistanceToApplyOffset = ownerBody.bestFitRadius * 1.75f;
+            FireProjectileInfo fireInfo = fireProjectileInfoTracker.FireInfo;
+
+            float projectileAimOriginSqrDistance = (inputBank.aimOrigin - fireInfo.position).sqrMagnitude;
+            const float MAX_PROJECTILE_DISTANCE_TO_APPLY_OFFSET = 1.15f;
 
 #if DEBUG
-            Log.Debug($"{self.name}: projectileAimOriginDistance={Mathf.Sqrt(projectileAimOriginSqrDistance)}, maxDistance={maxProjectileDistanceToApplyOffset}");
+            Log.Debug($"{self.name}: projectileAimOriginDistance={Mathf.Sqrt(projectileAimOriginSqrDistance)}, maxDistance={MAX_PROJECTILE_DISTANCE_TO_APPLY_OFFSET}");
 #endif
 
             // If the projectile position is far away from the aim origin,
             // it likely wasn't fired from there, so applying an offset doesn't make sense
-            if (projectileAimOriginSqrDistance > maxProjectileDistanceToApplyOffset * maxProjectileDistanceToApplyOffset)
+            if (projectileAimOriginSqrDistance > MAX_PROJECTILE_DISTANCE_TO_APPLY_OFFSET * MAX_PROJECTILE_DISTANCE_TO_APPLY_OFFSET)
                 return;
 
-            Vector3 visualOffset = inputBank.GetUnalteredAimOrigin() - currentProjectilePos;
+            Vector3 visualOffset = inputBank.GetUnalteredAimOrigin() - fireInfo.position;
 
 #if DEBUG
             Log.Debug($"{self.name}: visualOffsetDist={visualOffset.magnitude}");
