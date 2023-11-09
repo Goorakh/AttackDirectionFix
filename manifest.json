@@ -4,7 +4,7 @@
 	"displayName": "Attack Direction Fix",
 	"version_number": "1.0.0",
 	"website_url": "https://github.com/Goorakh/AttackDirectionFix",
-	"description": "Fixes attacks going in slightly different directions when aiming at an enemy",
+	"description": "Fixes attacks not always impacting where your crosshair is. Also known as the \"Pierce Bug\".",
 	"dependencies": [
 		"bbepis-BepInExPack-5.4.2100",
 		"RiskofThunder-HookGenPatcher-1.2.1",
