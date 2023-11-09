@@ -7,6 +7,7 @@
 	"description": "Fixes attacks going in slightly different directions when aiming at an enemy",
 	"dependencies": [
 		"bbepis-BepInExPack-5.4.2100",
-		"RiskofThunder-HookGenPatcher-1.2.1"
+		"RiskofThunder-HookGenPatcher-1.2.1",
+		"RiskofThunder-R2API_Core-5.0.11"
 	]
 }
