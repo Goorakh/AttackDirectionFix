@@ -94,6 +94,8 @@
 		<MakeDir Directories="$(TSPackageDir);$(TSPackagePluginDir)" />
 		<Copy SourceFiles="$(SolutionDir)manifest.json;$(SolutionDir)README.md;$(SolutionDir)CHANGELOG.md" DestinationFolder="$(TSPackageDir)" />
 		
+		<Copy SourceFiles="$(BuildDir)icon.png" DestinationFolder="$(TSPackageDir)" ContinueOnError="true" />
+		
 		<Copy SourceFiles="$(OutDir)/$(AssemblyName).dll" DestinationFolder="$(TSPackagePluginDir)" />
 		
 		<Copy SourceFiles="$(OutDir)/$(AssemblyName).pdb" DestinationFolder="$(TSPackagePluginDir)" Condition="'$(Configuration)'=='Debug'" />
