@@ -26,6 +26,10 @@ namespace AttackDirectionFix
 
             PlayerAimVisualizer.Init();
 
+#if DEBUG
+            // On.RoR2.Networking.NetworkManagerSystem.ClientSendAuth += (orig, self, conn) => { };
+#endif
+
             stopwatch.Stop();
             Log.Info_NoCallerPrefix($"Initialized in {stopwatch.Elapsed.TotalSeconds:F2} seconds");
         }
