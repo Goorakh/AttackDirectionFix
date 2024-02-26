@@ -1,6 +1,6 @@
 # Attack Direction Fix
 
-Fixes attacks not always impacting where your crosshair is. Also known as the "Pierce Bug".
+Fixes attacks not always aiming where your crosshair is. Also known as the "Pierce Bug".
 
 ## The problem
 
