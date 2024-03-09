@@ -64,8 +64,6 @@ namespace AttackDirectionFix.Patches
                 CameraRigController cameraRigController = CameraRigUtils.FindCameraRigControllerForBody(body);
                 if (cameraRigController)
                 {
-                    Transform cameraRigTransform = cameraRigController.transform;
-
 #pragma warning disable Publicizer001 // Accessing a member that was not originally public
                     CameraTargetParams cameraTargetParams = cameraRigController.targetParams;
 #pragma warning restore Publicizer001 // Accessing a member that was not originally public
@@ -73,7 +71,11 @@ namespace AttackDirectionFix.Patches
                     {
                         Vector3 cameraPivot = cameraTargetParams.cameraPivotTransform.position;
 
-                        return VectorUtils.ClosestPointAlongRay(new Ray(cameraRigTransform.position, cameraRigTransform.forward), cameraPivot);
+#pragma warning disable Publicizer001 // Accessing a member that was not originally public
+                        CameraState cameraState = cameraRigController.currentCameraState;
+#pragma warning restore Publicizer001 // Accessing a member that was not originally public
+
+                        return VectorUtils.ClosestPointAlongRay(new Ray(cameraState.position, cameraState.rotation * Vector3.forward), cameraPivot);
                     }
                 }
             }
