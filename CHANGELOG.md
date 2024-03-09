@@ -1,4 +1,4 @@
-**?.?.? Changed:**
+**1.1.0 Changed:**
 
 * Fixed heavy screenshake sometimes canceling sprinting
 
