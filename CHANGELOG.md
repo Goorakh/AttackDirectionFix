@@ -1,3 +1,8 @@
+**1.2.0 Changes:**
+
+* Fixed for SotS
+* Improved visual offset for certain projectiles
+
 **1.1.1 Changes:**
 
 * Fixed dead image links in README
