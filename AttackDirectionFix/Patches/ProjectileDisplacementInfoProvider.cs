@@ -50,6 +50,9 @@ namespace AttackDirectionFix.Patches
                     if (!fireProjectileInfo.owner || !fireProjectileInfo.owner.TryGetComponent(out CharacterBody ownerBody))
                         return;
 
+                    if (!ownerBody.isPlayerControlled)
+                        return;
+
                     InputBankTest ownerInputBank = ownerBody.inputBank;
                     if (!ownerInputBank)
                         return;

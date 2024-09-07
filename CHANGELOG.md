@@ -1,3 +1,7 @@
+**?.?.? Changes:**
+
+* Fixed enemy attacks being affected by the fix and behaving unexpectedly
+
 **1.2.0 Changes:**
 
 * Fixed for SotS
