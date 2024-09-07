@@ -1,4 +1,4 @@
-**?.?.? Changes:**
+**1.2.1 Changes:**
 
 * Fixed enemy attacks being affected by the fix and behaving unexpectedly
 

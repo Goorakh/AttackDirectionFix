@@ -2,7 +2,7 @@
 	"name": "AttackDirectionFix",
 	"authorName": "Gorakh",
 	"displayName": "Attack Direction Fix",
-	"version_number": "1.2.0",
+	"version_number": "1.2.1",
 	"website_url": "https://github.com/Goorakh/AttackDirectionFix",
 	"description": "Fixes attacks not always aiming where your crosshair is. Also known as the \"Pierce Bug\".",
 	"dependencies": [
