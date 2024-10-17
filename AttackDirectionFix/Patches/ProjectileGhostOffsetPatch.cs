@@ -1,4 +1,7 @@
-﻿using RoR2;
+﻿using HarmonyLib;
+using Mono.Cecil.Cil;
+using MonoMod.Cil;
+using RoR2;
 using RoR2.ConVar;
 using RoR2.Projectile;
 using UnityEngine;
@@ -11,7 +14,7 @@ namespace AttackDirectionFix.Patches
 
         public static void Init()
         {
-            On.RoR2.Projectile.ProjectileController.Start += ProjectileController_Start;
+            IL.RoR2.Projectile.ProjectileController.Start += ProjectileController_Start;
 
             On.RoR2.Projectile.ProjectileGhostController.LerpTransform += ProjectileGhostController_LerpTransform;
             On.RoR2.Projectile.ProjectileGhostController.CopyTransform += ProjectileGhostController_CopyTransform;
@@ -19,49 +22,145 @@ namespace AttackDirectionFix.Patches
             On.RoR2.Projectile.ProjectileStickOnImpact.TrySticking += ProjectileStickOnImpact_TrySticking;
         }
 
-        static void ProjectileController_Start(On.RoR2.Projectile.ProjectileController.orig_Start orig, ProjectileController self)
+        static void ProjectileController_Start(ILContext il)
         {
-            orig(self);
+            ILCursor c = new ILCursor(il);
 
-            ProjectileGhostController ghostController = self.ghost;
-            if (!ghostController)
-                return;
+            VariableDefinition hasVisualOffsetVar = new VariableDefinition(il.Import(typeof(bool)));
+            il.Method.Body.Variables.Add(hasVisualOffsetVar);
 
-            // Projectile ghosts can be pooled now, so make sure we remove the offset if it's not needed
+            VariableDefinition positionOffsetVar = new VariableDefinition(il.Import(typeof(Vector3)));
+            il.Method.Body.Variables.Add(positionOffsetVar);
 
-            ProjectileInitialOffset projectileOffset = ghostController.GetComponent<ProjectileInitialOffset>();
+            VariableDefinition rotationOffsetVar = new VariableDefinition(il.Import(typeof(Quaternion)));
+            il.Method.Body.Variables.Add(rotationOffsetVar);
 
-            bool shouldHaveOffset = false;
-
-            if (self.TryGetComponent(out ProjectileDisplacementInfoProvider projectileDisplacementProvider))
+            c.Emit(OpCodes.Ldarg_0);
+            c.Emit(OpCodes.Ldloca, hasVisualOffsetVar);
+            c.Emit(OpCodes.Ldloca, positionOffsetVar);
+            c.Emit(OpCodes.Ldloca, rotationOffsetVar);
+            c.EmitDelegate(getOffsets);
+            static void getOffsets(ProjectileController projectileController, out bool hasVisualOffset, out Vector3 positionOffset, out Quaternion rotationOffset)
             {
-                FireProjectileInfo unmodifiedFireInfo = projectileDisplacementProvider.UnmodifiedFireProjectileInfo;
-                FireProjectileInfo modifiedFireInfo = projectileDisplacementProvider.ModifiedFireProjectileInfo;
+                hasVisualOffset = false;
+                positionOffset = Vector3.zero;
+                rotationOffset = Quaternion.identity;
 
-                Vector3 visualPositionOffset = unmodifiedFireInfo.position - modifiedFireInfo.position;
-
-                // If the offset is very small, don't bother with the interpolation
-                const float MIN_VISUAL_OFFSET_DISTANCE = 0.15f;
-                if (visualPositionOffset.sqrMagnitude >= MIN_VISUAL_OFFSET_DISTANCE * MIN_VISUAL_OFFSET_DISTANCE)
+                if (projectileController.TryGetComponent(out ProjectileDisplacementInfoProvider projectileDisplacementProvider))
                 {
-                    if (!projectileOffset)
-                        projectileOffset = ghostController.gameObject.AddComponent<ProjectileInitialOffset>();
+                    FireProjectileInfo unmodifiedFireInfo = projectileDisplacementProvider.UnmodifiedFireProjectileInfo;
+                    FireProjectileInfo modifiedFireInfo = projectileDisplacementProvider.ModifiedFireProjectileInfo;
 
+                    Vector3 visualPositionOffset = unmodifiedFireInfo.position - modifiedFireInfo.position;
+
+                    // If the offset is very small, don't bother with the interpolation
+                    const float MIN_VISUAL_OFFSET_DISTANCE = 0.15f;
+                    if (visualPositionOffset.sqrMagnitude >= MIN_VISUAL_OFFSET_DISTANCE * MIN_VISUAL_OFFSET_DISTANCE)
+                    {
 #if DEBUG
-                    Log.Debug($"{self.name} visual offset dst: {visualPositionOffset.magnitude}");
+                        Log.Debug($"{projectileController.name} visual offset dst: {visualPositionOffset.magnitude}");
 #endif
 
-                    projectileOffset.StartTime = Time.time;
-                    projectileOffset.InitialPositionOffset = visualPositionOffset;
-                    projectileOffset.InterpolationTime = _cvProjectileInterpolationTime.value;
-
-                    shouldHaveOffset = true;
+                        hasVisualOffset = true;
+                        positionOffset = visualPositionOffset;
+                    }
                 }
             }
 
-            if (!shouldHaveOffset && projectileOffset)
+            VariableDefinition rotationTempVar = new VariableDefinition(il.Import(typeof(Quaternion)));
+            il.Method.Body.Variables.Add(rotationTempVar);
+
+            void emitPositionOffset(ILCursor c)
             {
-                GameObject.Destroy(projectileOffset);
+                c.Emit(OpCodes.Ldloc, positionOffsetVar);
+                c.EmitDelegate(getVisualPosition);
+                static Vector3 getVisualPosition(Vector3 position, Vector3 offset)
+                {
+                    return position + offset;
+                }
+            }
+
+            void emitRotationOffset(ILCursor c)
+            {
+                c.Emit(OpCodes.Ldloc, rotationOffsetVar);
+                c.EmitDelegate(getVisualRotation);
+                static Quaternion getVisualRotation(Quaternion rotation, Quaternion offset)
+                {
+                    return rotation * offset;
+                }
+            }
+
+            void emitPositionRotationOffset(ILCursor c)
+            {
+                c.Emit(OpCodes.Stloc, rotationTempVar);
+
+                emitPositionOffset(c);
+
+                c.Emit(OpCodes.Ldloc, rotationTempVar);
+
+                emitRotationOffset(c);
+            }
+
+            if (c.TryGotoNext(MoveType.Before,
+                              x => x.MatchCallOrCallvirt(SymbolExtensions.GetMethodInfo(() => UnityEngine.Object.Instantiate(default(GameObject), default(Vector3), default)))))
+            {
+                emitPositionRotationOffset(c);
+            }
+            else
+            {
+                Log.Error("Failed to find non-pooled ghost instantiate patch location");
+            }
+
+            if (c.TryGotoNext(MoveType.Before,
+                              x => x.MatchCallOrCallvirt(SymbolExtensions.GetMethodInfo(() => EffectManager.GetAndActivatePooledEffect(default, default(Vector3), default)))))
+            {
+                emitPositionRotationOffset(c);
+            }
+            else
+            {
+                Log.Error("Failed to find pooled ghost instantiate patch location");
+            }
+
+            if (c.TryGotoNext(MoveType.AfterLabel, x => x.MatchRet()))
+            {
+                c.Emit(OpCodes.Ldarg_0);
+                c.Emit(OpCodes.Ldloc, hasVisualOffsetVar);
+                c.Emit(OpCodes.Ldloc, positionOffsetVar);
+                c.Emit(OpCodes.Ldloc, rotationOffsetVar);
+                c.EmitDelegate(initializeGhostOffset);
+                static void initializeGhostOffset(ProjectileController projectileController, bool hasVisualOffset, Vector3 positionOffset, Quaternion rotationOffset)
+                {
+                    if (!projectileController)
+                        return;
+
+                    ProjectileGhostController ghostController = projectileController.ghost;
+                    if (!ghostController)
+                        return;
+
+                    ProjectileInitialOffset projectileOffset = ghostController.GetComponent<ProjectileInitialOffset>();
+
+                    if (hasVisualOffset)
+                    {
+                        if (!projectileOffset)
+                            projectileOffset = ghostController.gameObject.AddComponent<ProjectileInitialOffset>();
+
+                        projectileOffset.StartTime = Time.time;
+                        projectileOffset.InitialPositionOffset = positionOffset;
+                        projectileOffset.InitialRotationOffset = rotationOffset;
+                        projectileOffset.InterpolationTime = _cvProjectileInterpolationTime.value;
+                    }
+                    else
+                    {
+                        if (projectileOffset)
+                        {
+                            GameObject.Destroy(projectileOffset);
+                        }
+                    }
+                }
+            }
+            else
+            {
+                Log.Error("Failed to find ret match");
             }
         }
 
