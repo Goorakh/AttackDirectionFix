@@ -7,7 +7,7 @@
 	"description": "Fixes attacks not always aiming where your crosshair is. Also known as the \"Pierce Bug\".",
 	"dependencies": [
 		"bbepis-BepInExPack-5.4.2100",
-		"RiskofThunder-HookGenPatcher-1.2.4",
-		"RiskofThunder-R2API_Core-5.1.1"
+		"RiskofThunder-HookGenPatcher-1.2.5",
+		"RiskofThunder-R2API_Core-5.1.2"
 	]
 }
