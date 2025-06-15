@@ -57,23 +57,15 @@ namespace AttackDirectionFix.Patches
 
             if (!_tempDisablePatch)
             {
-#pragma warning disable Publicizer001 // Accessing a member that was not originally public
-                CharacterBody body = self.characterBody;
-#pragma warning restore Publicizer001 // Accessing a member that was not originally public
-
-                CameraRigController cameraRigController = CameraRigUtils.FindCameraRigControllerForBody(body);
+                CameraRigController cameraRigController = CameraRigUtils.FindCameraRigControllerForBody(self.characterBody);
                 if (cameraRigController)
                 {
-#pragma warning disable Publicizer001 // Accessing a member that was not originally public
                     CameraTargetParams cameraTargetParams = cameraRigController.targetParams;
-#pragma warning restore Publicizer001 // Accessing a member that was not originally public
                     if (cameraTargetParams && cameraTargetParams.cameraPivotTransform)
                     {
                         Vector3 cameraPivot = cameraTargetParams.cameraPivotTransform.position;
 
-#pragma warning disable Publicizer001 // Accessing a member that was not originally public
                         CameraState cameraState = cameraRigController.currentCameraState;
-#pragma warning restore Publicizer001 // Accessing a member that was not originally public
 
                         return VectorUtils.ClosestPointAlongRay(new Ray(cameraState.position, cameraState.rotation * Vector3.forward), cameraPivot);
                     }
