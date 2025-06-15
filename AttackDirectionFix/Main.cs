@@ -4,6 +4,7 @@ using System.Diagnostics;
 
 namespace AttackDirectionFix
 {
+    [BepInDependency(R2API.R2API.PluginGUID)]
     [BepInPlugin(PluginGUID, PluginName, PluginVersion)]
     public class Main : BaseUnityPlugin
     {
