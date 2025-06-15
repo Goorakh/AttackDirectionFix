@@ -1,3 +1,9 @@
+## Changes
+
+**?.?.? Changes:**
+
+* Fixed stationary projectiles sometimes spawning in the wrong location and shifting weirdly.
+
 **1.2.2 Changes:**
 
 * Fixed some projectile visuals appearing in the wrong position for the first frame after being fired

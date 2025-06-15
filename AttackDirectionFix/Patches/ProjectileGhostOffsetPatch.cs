@@ -46,22 +46,17 @@ namespace AttackDirectionFix.Patches
                 positionOffset = Vector3.zero;
                 rotationOffset = Quaternion.identity;
 
-                if (projectileController.TryGetComponent(out ProjectileDisplacementInfoProvider projectileDisplacementProvider))
+                if (projectileController && projectileController.TryGetComponent(out ProjectileDisplacementInfoProvider projectileDisplacementProvider))
                 {
                     FireProjectileInfo unmodifiedFireInfo = projectileDisplacementProvider.UnmodifiedFireProjectileInfo;
                     FireProjectileInfo modifiedFireInfo = projectileDisplacementProvider.ModifiedFireProjectileInfo;
 
                     Vector3 visualPositionOffset = unmodifiedFireInfo.position - modifiedFireInfo.position;
 
-                    // If the offset is very small, don't bother with the interpolation
-                    const float MIN_VISUAL_OFFSET_DISTANCE = 0.15f;
-                    if (visualPositionOffset.sqrMagnitude >= MIN_VISUAL_OFFSET_DISTANCE * MIN_VISUAL_OFFSET_DISTANCE)
-                    {
-                        Log.Debug($"{projectileController.name} visual offset dst: {visualPositionOffset.magnitude}");
+                    Log.Debug($"{projectileController.name} visual offset dst: {visualPositionOffset.magnitude}");
 
-                        hasVisualOffset = true;
-                        positionOffset = visualPositionOffset;
-                    }
+                    hasVisualOffset = true;
+                    positionOffset = visualPositionOffset;
                 }
             }
 
@@ -176,7 +171,7 @@ namespace AttackDirectionFix.Patches
 
         static void tryApplyOffset(ProjectileGhostController ghostController)
         {
-            if (ghostController.TryGetComponent(out ProjectileInitialOffset projectileInitialOffset))
+            if (ghostController && ghostController.TryGetComponent(out ProjectileInitialOffset projectileInitialOffset))
             {
                 Transform transform = ghostController.transform;
 
@@ -189,7 +184,7 @@ namespace AttackDirectionFix.Patches
         {
             bool stickingSuccess = orig(self, hitCollider, impactNormal);
 
-            if (stickingSuccess && self.TryGetComponent(out ProjectileController projectileController))
+            if (stickingSuccess && self && self.TryGetComponent(out ProjectileController projectileController))
             {
                 ProjectileGhostController ghostController = projectileController.ghost;
                 if (ghostController && ghostController.TryGetComponent(out ProjectileInitialOffset projectileInitialOffset))

@@ -53,6 +53,10 @@ namespace AttackDirectionFix.Patches
                     if (!ownerBody.isPlayerControlled)
                         return;
 
+                    int projectileIndex = ProjectileCatalog.GetProjectileIndex(fireProjectileInfo.projectilePrefab);
+                    if (ProjectileAttributeTracker.IsStationaryProjectile(projectileIndex))
+                        return;
+
                     InputBankTest ownerInputBank = ownerBody.inputBank;
                     if (!ownerInputBank)
                         return;
