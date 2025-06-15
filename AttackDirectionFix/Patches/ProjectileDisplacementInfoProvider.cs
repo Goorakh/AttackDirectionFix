@@ -67,9 +67,7 @@ namespace AttackDirectionFix.Patches
                     float maxProjectileSqrDistance = maxProjectileDistance * maxProjectileDistance;
                     Vector3 projectileOwnerOffset = ownerBody.corePosition - visualFirePosition;
 
-#if DEBUG
                     Log.Debug($"{fireProjectileInfo.projectilePrefab.name}: dst={projectileOwnerOffset.magnitude}, maxDst={maxProjectileDistance}");
-#endif
 
                     if (projectileOwnerOffset.sqrMagnitude > maxProjectileSqrDistance)
                         return;

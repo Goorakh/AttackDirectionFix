@@ -57,9 +57,7 @@ namespace AttackDirectionFix.Patches
                     const float MIN_VISUAL_OFFSET_DISTANCE = 0.15f;
                     if (visualPositionOffset.sqrMagnitude >= MIN_VISUAL_OFFSET_DISTANCE * MIN_VISUAL_OFFSET_DISTANCE)
                     {
-#if DEBUG
                         Log.Debug($"{projectileController.name} visual offset dst: {visualPositionOffset.magnitude}");
-#endif
 
                         hasVisualOffset = true;
                         positionOffset = visualPositionOffset;
