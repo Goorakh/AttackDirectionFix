@@ -66,7 +66,7 @@ namespace AttackDirectionFix
             return ArrayUtils.GetSafe(_isStationaryLookup, projectileIndex);
         }
 
-        class ProjectileMovementTracker : MonoBehaviour
+        sealed class ProjectileMovementTracker : MonoBehaviour
         {
             const float MovementEpsilon = 0.1f;
 

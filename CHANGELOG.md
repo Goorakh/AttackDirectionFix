@@ -1,5 +1,9 @@
 ## Changes
 
+**1.2.4 Changes:**
+
+* Updated for Alloyed Collective
+
 **1.2.3 Changes:**
 
 * Fixed stationary projectiles sometimes spawning in the wrong location and shifting weirdly.

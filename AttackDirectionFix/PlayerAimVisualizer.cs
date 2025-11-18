@@ -63,9 +63,7 @@ namespace AttackDirectionFix
                 }
             }
 
-#pragma warning disable Publicizer001 // Accessing a member that was not originally public
             CameraTargetParams cameraTargetParams = cameraRigController.targetParams;
-#pragma warning restore Publicizer001 // Accessing a member that was not originally public
             if (cameraTargetParams && cameraTargetParams.cameraPivotTransform)
             {
                 if (_cameraPivotVisualizer)

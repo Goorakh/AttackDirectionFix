@@ -2,7 +2,7 @@
 
 namespace AttackDirectionFix
 {
-    public class ProjectileInitialOffset : MonoBehaviour
+    public sealed class ProjectileInitialOffset : MonoBehaviour
     {
         public float StartTime;
 
@@ -16,6 +16,7 @@ namespace AttackDirectionFix
         float interpolationFraction => Mathf.Pow(Mathf.Clamp01(age / InterpolationTime), 1f / 3f);
 
         public Vector3 CurrentPositionOffset => Vector3.Lerp(InitialPositionOffset, Vector3.zero, interpolationFraction);
+
         public Quaternion CurrentRotationOffset => Quaternion.Lerp(InitialRotationOffset, Quaternion.identity, interpolationFraction);
 
         void FixedUpdate()

@@ -10,25 +10,17 @@ using UnityEngine;
 
 namespace AttackDirectionFix.Patches
 {
-    public class ProjectileDisplacementInfoProvider : MonoBehaviour
+    public sealed class ProjectileDisplacementInfoProvider : MonoBehaviour
     {
-        class DisplacementData
-        {
-            public FireProjectileInfo OriginalFireProjectileInfo { get; private set; }
-
-            public DisplacementData(FireProjectileInfo originalFireProjectileInfo)
-            {
-                OriginalFireProjectileInfo = originalFireProjectileInfo;
-            }
-        }
+        sealed record class DisplacementData(FireProjectileInfo OriginalFireProjectileInfo);
 
         [SystemInitializer]
         static void Init()
         {
-            IL.RoR2.Projectile.ProjectileManager.FireProjectileServer += modifyFirePosition;
-            IL.RoR2.Projectile.ProjectileManager.FireProjectileClient += modifyFirePosition;
+            IL.RoR2.Projectile.ProjectileManager.FireProjectileServer += modifyFirePositionPatch;
+            IL.RoR2.Projectile.ProjectileManager.FireProjectileClient += modifyFirePositionPatch;
 
-            static void modifyFirePosition(ILContext il)
+            static void modifyFirePositionPatch(ILContext il)
             {
                 ILCursor c = new ILCursor(il);
 
@@ -62,12 +54,12 @@ namespace AttackDirectionFix.Patches
                         return;
 
                     Vector3 visualFirePosition = fireProjectileInfo.position;
-                    if ((visualFirePosition - ownerInputBank.aimOrigin).sqrMagnitude < Mathf.Epsilon)
+                    if ((visualFirePosition - ownerInputBank.aimOrigin).sqrMagnitude <= Mathf.Epsilon)
                     {
                         visualFirePosition = ownerInputBank.GetUnalteredAimOrigin();
                     }
 
-                    float maxProjectileDistance = ownerBody.bestFitRadius;
+                    float maxProjectileDistance = ownerBody.bestFitRadius * 1.5f;
                     float maxProjectileSqrDistance = maxProjectileDistance * maxProjectileDistance;
                     Vector3 projectileOwnerOffset = ownerBody.corePosition - visualFirePosition;
 
