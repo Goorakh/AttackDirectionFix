@@ -46,8 +46,11 @@ namespace AttackDirectionFix.Patches
                         return;
 
                     int projectileIndex = ProjectileCatalog.GetProjectileIndex(fireProjectileInfo.projectilePrefab);
-                    if (ProjectileAttributeTracker.IsStationaryProjectile(projectileIndex))
+                    if (!ProjectileAttributeTracker.ShouldModifyFireDirection(projectileIndex))
+                    {
+                        Log.Debug($"Not modifying fire info for: {fireProjectileInfo.projectilePrefab.name}");
                         return;
+                    }
 
                     InputBankTest ownerInputBank = ownerBody.inputBank;
                     if (!ownerInputBank)

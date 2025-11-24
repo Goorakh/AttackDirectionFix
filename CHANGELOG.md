@@ -1,5 +1,9 @@
 ## Changes
 
+**?.?.? Changes:**
+
+* Excluded Drifter's Junk Cube from the mod, as the fix doesn't make sense for it and introduced differences to vanilla in the cube's spawn position.
+
 **1.2.4 Changes:**
 
 * Updated for Alloyed Collective
