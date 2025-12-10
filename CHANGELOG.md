@@ -1,6 +1,6 @@
 ## Changes
 
-**?.?.? Changes:**
+**1.2.6 Changes:**
 
 * Fixed Drifter's Junk Cube no longer being excluded after Alloyed Collective patch v1.4.1
 
