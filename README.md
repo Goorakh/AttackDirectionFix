@@ -30,3 +30,7 @@ The solution this mod uses is to always use the camera as the *Aim Origin* and t
 Projectiles shooting straight out of the camera looks bad however. So one final thing the mod does is for a short period of the projectile's lifetime, projectiles visuals are offset to appear to come out of the model as usual, and over-time interpolate to the actual path. Projectile collision and everything logic related follows the **Actual** path while everything visual follows the **Visual** path before lining up with the **Actual** path after a short while.
 
 ![](https://github.com/Goorakh/AttackDirectionFix/blob/master/ReadmeAssets/Solution.jpg?raw=true)
+
+## Mod Developers
+
+This mod shouldn't cause any problems by itself, but if you need precise control over projectile spawn position and rotations, you can add your projectile(s) into this mod's blacklist via the `ProjectileAttributes.BlacklistProjectile` methods

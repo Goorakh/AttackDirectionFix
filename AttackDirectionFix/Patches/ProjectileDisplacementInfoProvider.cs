@@ -46,7 +46,7 @@ namespace AttackDirectionFix.Patches
                         return;
 
                     int projectileIndex = ProjectileCatalog.GetProjectileIndex(fireProjectileInfo.projectilePrefab);
-                    if (!ProjectileAttributeTracker.ShouldModifyFireDirection(projectileIndex))
+                    if (!ProjectileAttributes.ShouldModifyFireDirection(projectileIndex))
                     {
                         Log.Debug($"Not modifying fire info for: {fireProjectileInfo.projectilePrefab.name}");
                         return;

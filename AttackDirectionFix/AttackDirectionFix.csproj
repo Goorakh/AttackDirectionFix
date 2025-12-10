@@ -19,8 +19,9 @@
     <BuildDir>$(SolutionDir)build/</BuildDir>
     <TSPackageDir>$(BuildDir)/package/</TSPackageDir>
     <TSPackagePluginDir>$(TSPackageDir)/plugins/$(SolutionName)/</TSPackagePluginDir>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
-	
+    
   <ItemGroup>
     <Compile Remove="libs\**" />
     <EmbeddedResource Remove="libs\**" />
@@ -96,11 +97,11 @@
     <Copy SourceFiles="$(SolutionDir)manifest.json;$(SolutionDir)README.md;$(SolutionDir)CHANGELOG.md" DestinationFolder="$(TSPackageDir)" />
     
     <Copy SourceFiles="$(BuildDir)icon.png" DestinationFolder="$(TSPackageDir)" ContinueOnError="true" />
-    
+
     <Copy SourceFiles="$(OutDir)/$(AssemblyName).dll" DestinationFolder="$(TSPackagePluginDir)" />
+    <Copy SourceFiles="$(OutDir)/$(AssemblyName).xml" DestinationFolder="$(TSPackagePluginDir)" />
     
-    <Copy SourceFiles="$(OutDir)/$(AssemblyName).pdb" DestinationFolder="$(TSPackagePluginDir)" Condition="'$(Configuration)'=='Debug'" />
-    <Delete Files="$(TSPackagePluginDir)/$(AssemblyName).pdb" Condition="'$(Configuration)'=='Release'" />
+    <Copy SourceFiles="$(OutDir)/$(AssemblyName).pdb" DestinationFolder="$(TSPackagePluginDir)" />
     
     <ZipDirectory SourceDirectory="$(TSPackageDir)" DestinationFile="$(BuildDir)/$(SolutionName).zip" Overwrite="true" />
   </Target>
