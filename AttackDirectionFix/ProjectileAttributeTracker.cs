@@ -19,14 +19,14 @@ namespace AttackDirectionFix
             if (ProjectileCatalog.projectilePrefabCount <= 0)
                 return;
             
-            List<int> projectileIndexBlacklist = [];
+            HashSet<int> projectileIndexBlacklist = [];
 
             void addProjectileIndexByName(string projectileName, ICollection<int> projectileIndices)
             {
                 int projectileIndex = ProjectileCatalog.FindProjectileIndex(projectileName);
                 if (projectileIndex < 0)
                 {
-                    Log.Error($"Failed to find projectile '{projectileName}'");
+                    Log.Warning($"Failed to find projectile '{projectileName}'");
                     return;
                 }
 
@@ -34,7 +34,7 @@ namespace AttackDirectionFix
             }
 
             addProjectileIndexByName("DrifterJunkCubeProjectile", projectileIndexBlacklist);
-            addProjectileIndexByName("JunkCubeConsoleOptPrefabVariant", projectileIndexBlacklist);
+            addProjectileIndexByName("JunkCubePrefab", projectileIndexBlacklist);
 
             _projectileBlacklist = [.. projectileIndexBlacklist];
             Array.Sort(_projectileBlacklist);
